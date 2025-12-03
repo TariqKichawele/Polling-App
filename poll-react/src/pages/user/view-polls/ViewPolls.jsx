@@ -1,6 +1,6 @@
 import { useSnackbar } from "notistack";
 import React, { useCallback, useEffect, useState } from "react";
-import { deletePoll, getAllPolls } from "../../../services/poll/poll";
+import { deletePoll, getMyPolls } from "../../../services/poll/poll";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -48,7 +48,7 @@ const ViewPolls = () => {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await getAllPolls();
+      const response = await getMyPolls();
       if (response.status === 200) {
         setPolls(response.data);
       }
