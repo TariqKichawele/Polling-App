@@ -81,11 +81,31 @@ public class PollController {
         }
     }
 
+    @DeleteMapping("/poll/unlike/{pollId}")
+    public ResponseEntity<?> unlikePoll(@PathVariable Long pollId) {
+        try {
+            pollService.unlikePoll(pollId);
+            return ResponseEntity.status(HttpStatus.OK).body(Collections.singletonMap("message", "Unlike successful"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.singletonMap("message", "Internal server error" + e.getMessage()));
+        }
+    }
+
     @PostMapping("/poll/comment")
     public ResponseEntity<?> commentOnPoll(@RequestBody CommentDTO commentDTO) {
         try {
             CommentDTO comment = pollService.commentOnPoll(commentDTO);
             return ResponseEntity.status(HttpStatus.OK).body(comment);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.singletonMap("message", "Internal server error" + e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/poll/comment/{commentId}")
+    public ResponseEntity<?> deleteComment(@PathVariable Long commentId) {
+        try {
+            pollService.deleteComment(commentId);
+            return ResponseEntity.status(HttpStatus.OK).body(Collections.singletonMap("message", "Comment deleted successfully"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.singletonMap("message", "Internal server error" + e.getMessage()));
         }

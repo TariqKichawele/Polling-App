@@ -14,7 +14,9 @@ public interface PollService {
     List<PollDTO> getAllPolls();
     List<PollDTO> getMyPolls();
     LikesDTO likePoll(Long pollId);
+    void unlikePoll(Long pollId);
     CommentDTO commentOnPoll(CommentDTO commentDTO);
+    void deleteComment(Long commentId);
     VoteDTO voteOnPoll(VoteDTO voteDTO);
     PollDetailsDTO getPollDetails(Long pollId);
 }

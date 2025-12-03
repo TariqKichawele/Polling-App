@@ -78,9 +78,35 @@ export const likePoll = async (pollId) => {
     }
 }
 
+export const unlikePoll = async (pollId) => {
+    try {
+        const response = await axiosInstance.delete(`/api/user/poll/unlike/${pollId}`);
+        return response;
+    } catch (error) {
+        if (error.response && error.response.status === 401) {
+            throw new Error('Unauthorized');
+        } else {
+            throw error;
+        }
+    }
+}
+
 export const commentOnPoll = async (commentDTO) => {
     try {
         const response = await axiosInstance.post('/api/user/poll/comment', commentDTO);
+        return response;
+    } catch (error) {
+        if (error.response && error.response.status === 401) {
+            throw new Error('Unauthorized');
+        } else {
+            throw error;
+        }
+    }
+}
+
+export const deleteComment = async (commentId) => {
+    try {
+        const response = await axiosInstance.delete(`/api/user/poll/comment/${commentId}`);
         return response;
     } catch (error) {
         if (error.response && error.response.status === 401) {

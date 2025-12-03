@@ -131,13 +131,7 @@ public class PollServiceImpl implements PollService {
         pollDTO.setTotalVoteCount(poll.getTotalVoteCount());
 
         User pollOwner = poll.getUser();
-
-        if (loggedInUser != null && pollOwner.getId().equals(loggedInUser.getId())) {
-            pollDTO.setUsername("You");
-        } else {
-            pollDTO.setUsername(pollOwner.getFirstName() + " " + pollOwner.getLastName());
-        }
-
+        pollDTO.setUsername(pollOwner.getFirstName() + " " + pollOwner.getLastName());
         pollDTO.setUserId(pollOwner.getId());
 
         if (loggedInUser != null) {
@@ -174,6 +168,16 @@ public class PollServiceImpl implements PollService {
     }
 
     @Override
+    @Transactional
+    public void unlikePoll(Long pollId) {
+        User user = jwtUtil.getLoggedInUser();
+        if (user != null) {
+            Optional<Likes> like = likesRepository.findByPollIdAndUserId(pollId, user.getId());
+            like.ifPresent(likesRepository::delete);
+        }
+    }
+
+    @Override
     public CommentDTO commentOnPoll(CommentDTO commentDTO) {
         Optional<Poll> optionalPoll = pollRepository.findById(commentDTO.getPollId());
         User user = jwtUtil.getLoggedInUser();
@@ -186,6 +190,18 @@ public class PollServiceImpl implements PollService {
             return commentRepository.save(comment).getCommentDTO();
         }
         return null;
+    }
+
+    @Override
+    @Transactional
+    public void deleteComment(Long commentId) {
+        User user = jwtUtil.getLoggedInUser();
+        Optional<Comment> comment = commentRepository.findById(commentId);
+        if (user != null && comment.isPresent() && comment.get().getUser().getId().equals(user.getId())) {
+            commentRepository.deleteById(commentId);
+        } else {
+            throw new RuntimeException("Unauthorized to delete this comment");
+        }
     }
 
     @Override
@@ -229,9 +245,7 @@ public class PollServiceImpl implements PollService {
 
             List<CommentDTO> commentDTOList = comments.stream().map(comment -> {
                 CommentDTO commentDTO = comment.getCommentDTO();
-                if (comment.getUser().getId().equals(user.getId())) {
-                    commentDTO.setUsername("You");
-                }
+                commentDTO.setOwner(comment.getUser().getId().equals(user.getId()));
                 return commentDTO;
             }).toList();
 

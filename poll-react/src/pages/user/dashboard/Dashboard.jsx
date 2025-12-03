@@ -29,6 +29,16 @@ import { voteOnPoll } from "../../../services/poll/poll";
 import LinearProgress from "@mui/material/LinearProgress";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 
+// Helper function to get initials from name
+const getInitials = (name) => {
+  if (!name) return "?";
+  const parts = name.split(" ");
+  if (parts.length >= 2) {
+    return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+  }
+  return name.charAt(0).toUpperCase();
+};
+
 const Dashboard = () => {
   const [polls, setPolls] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -154,7 +164,7 @@ const Dashboard = () => {
                   <CardHeader
                     avatar={
                       <Avatar sx={{ bgcolor: blue[500] }} aria-label="recipe">
-                        {poll.username.charAt(0)}
+                        {getInitials(poll.username)}
                       </Avatar>
                     }
                     title={poll.username}

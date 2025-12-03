@@ -12,4 +12,5 @@ public class CommentDTO {
     private String username;
     private Long userId;
     private Long pollId;
+    private boolean isOwner;
 }

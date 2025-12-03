@@ -5,7 +5,9 @@ import {
   voteOnPoll,
   getPollDetails,
   likePoll,
+  unlikePoll,
   commentOnPoll,
+  deleteComment,
 } from "../../../services/poll/poll";
 import { useParams } from "react-router-dom";
 import {
@@ -24,6 +26,12 @@ import {
   TextField,
   Button,
   LinearProgress,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 import { blue } from "@mui/material/colors";
 import moment from "moment";
@@ -32,8 +40,19 @@ import {
   Favorite as FavoriteIcon,
   FavoriteBorder as FavoriteBorderIcon,
   Comment as CommentIcon,
+  DeleteOutline as DeleteOutlineIcon,
 } from "@mui/icons-material";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+
+// Helper function to get initials from name
+const getInitials = (name) => {
+  if (!name) return "?";
+  const parts = name.split(" ");
+  if (parts.length >= 2) {
+    return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+  }
+  return name.charAt(0).toUpperCase();
+};
 
 const ViewPollDetails = () => {
   const [loading, setLoading] = useState(false);
@@ -42,6 +61,8 @@ const ViewPollDetails = () => {
   const [commentsCount, setCommentsCount] = useState(0);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [commentToDelete, setCommentToDelete] = useState(null);
   const { id: pollId } = useParams();
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
@@ -146,21 +167,16 @@ const ViewPollDetails = () => {
     }
   };
 
-  const handleComment = async (pollId) => {
+  const handleUnlike = async (pollId) => {
     setLoading(true);
     try {
-      const obj = {
-        pollId: pollId,
-        content: newComment,
-      };
-      const response = await commentOnPoll(obj);
+      const response = await unlikePoll(pollId);
       if (response.status === 200) {
-        enqueueSnackbar("Comment successful", {
+        enqueueSnackbar("Unlike successful", {
           variant: "success",
           autoHideDuration: 3000,
         });
         await fetchData();
-        setComments([...comments, response.data]);
       }
     } catch (error) {
       if (error.response && error.response.status === 401) {
@@ -180,6 +196,87 @@ const ViewPollDetails = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleComment = async (pollId) => {
+    setLoading(true);
+    try {
+      const obj = {
+        pollId: pollId,
+        content: newComment,
+      };
+      const response = await commentOnPoll(obj);
+      if (response.status === 200) {
+        enqueueSnackbar("Comment successful", {
+          variant: "success",
+          autoHideDuration: 3000,
+        });
+        setNewComment("");
+        await fetchData();
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 401) {
+        const errorMessage = error.response.data?.message || "Unauthorized";
+        enqueueSnackbar(errorMessage, {
+          variant: "error",
+          autoHideDuration: 3000,
+        });
+      } else {
+        const errorMessage =
+          error.response?.data?.message || "Something went wrong";
+        enqueueSnackbar(errorMessage, {
+          variant: "error",
+          autoHideDuration: 3000,
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteClick = (comment) => {
+    setCommentToDelete(comment);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!commentToDelete) return;
+    
+    setLoading(true);
+    setDeleteDialogOpen(false);
+    try {
+      const response = await deleteComment(commentToDelete.id);
+      if (response.status === 200) {
+        enqueueSnackbar("Comment deleted successfully", {
+          variant: "success",
+          autoHideDuration: 3000,
+        });
+        await fetchData();
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 401) {
+        const errorMessage = error.response.data?.message || "Unauthorized";
+        enqueueSnackbar(errorMessage, {
+          variant: "error",
+          autoHideDuration: 3000,
+        });
+      } else {
+        const errorMessage =
+          error.response?.data?.message || "Something went wrong";
+        enqueueSnackbar(errorMessage, {
+          variant: "error",
+          autoHideDuration: 3000,
+        });
+      }
+    } finally {
+      setLoading(false);
+      setCommentToDelete(null);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+    setCommentToDelete(null);
   };
 
   return (
@@ -220,7 +317,7 @@ const ViewPollDetails = () => {
                   <CardHeader
                     avatar={
                       <Avatar sx={{ bgcolor: blue[500] }} aria-label="recipe">
-                        {pollDetails.username.charAt(0)}
+                        {getInitials(pollDetails.username)}
                       </Avatar>
                     }
                     title={pollDetails.username}
@@ -259,7 +356,7 @@ const ViewPollDetails = () => {
                       pollDetails.optionsDTO.map((option) => (
                         <Paper 
                           key={option.id} 
-                          sx={{ p: 1, width: "95%", mt: 1 }}
+                          sx={{ p: 1, width: "95%", mt: 1, cursor: 'pointer' }}
                           elevation={3}
                           onClick={() => handleVote(pollDetails.id, option.id)}
                         >
@@ -304,11 +401,14 @@ const ViewPollDetails = () => {
                   >
                     <Grid item sx={{ cursor: "pointer" }}>
                       <Grid container direction="row" alignItems="center">
-                        
                         {pollDetails.liked ? (
-                          <FavoriteIcon sx={{ color: "red" }} />
+                          <FavoriteIcon 
+                            sx={{ color: "red", cursor: "pointer" }} 
+                            onClick={() => handleUnlike(pollDetails.id)}
+                          />
                         ) : (
                           <FavoriteBorderIcon
+                            sx={{ cursor: "pointer" }}
                             onClick={() => handleLike(pollDetails.id)}
                           />
                         )}
@@ -341,25 +441,43 @@ const ViewPollDetails = () => {
                       >
                         Comments
                       </Typography>
-                      <Box sx={{ maxHeight: "200px", overflowY: "auto", p: 1 }}>
+                      <Box sx={{ maxHeight: "300px", overflowY: "auto", p: 1 }}>
                         {comments.map((comment, index) => (
-                          <>
+                          <React.Fragment key={comment.id || index}>
                             <Divider />
-                            <Typography
-                              key={index}
-                              variant="body1"
-                              gutterBottom
-                              sx={{ mb: -2, pt: 2 }}
-                            >
-                              <strong>{comment.content}</strong>
-                            </Typography>
-                            <p>
-                              posted {moment(comment.createdAt).fromNow()} by{" "}
-                              <strong>{comment.username}</strong>
-                            </p>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', pt: 1 }}>
+                              <Box sx={{ flex: 1 }}>
+                                <Typography
+                                  variant="body1"
+                                  gutterBottom
+                                  sx={{ mb: 0 }}
+                                >
+                                  <strong>{comment.content}</strong>
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                                  posted {moment(comment.createdAt).fromNow()} by{" "}
+                                  <strong>{comment.username}</strong>
+                                </Typography>
+                              </Box>
+                              {comment.owner && (
+                                <IconButton
+                                  size="small"
+                                  color="error"
+                                  onClick={() => handleDeleteClick(comment)}
+                                  sx={{ mt: 0.5 }}
+                                >
+                                  <DeleteOutlineIcon fontSize="small" />
+                                </IconButton>
+                              )}
+                            </Box>
                             <Divider />
-                          </>
+                          </React.Fragment>
                         ))}
+                        {comments.length === 0 && (
+                          <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
+                            No comments yet. Be the first to comment!
+                          </Typography>
+                        )}
                       </Box>
                       <Box sx={{ mt: 2 }}>
                         <TextField
@@ -369,9 +487,8 @@ const ViewPollDetails = () => {
                           value={newComment}
                           onChange={(e) => setNewComment(e.target.value)}
                           onKeyDown={(e) => {
-                            if (e.key === "Enter") {
+                            if (e.key === "Enter" && newComment.trim()) {
                               handleComment(pollDetails.id);
-                              setNewComment("");
                             }
                           }}
                         />
@@ -396,6 +513,32 @@ const ViewPollDetails = () => {
           )}
         </Grid>
       </Box>
+      
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteCancel}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">
+          Delete Comment
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            Are you sure you want to delete this comment? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Backdrop
         open={loading}
         sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
