@@ -184,7 +184,7 @@ const ViewPollDetails = () => {
 
   return (
     <>
-      <Box sx={{ flexGrow: 1 }}>
+      <Box sx={{ flexGrow: 1, px: { xs: 2, sm: 3, md: 0 } }}>
         <Grid container spacing={3} direction={"column"} alignItems={"center"}>
           {pollDetails === null && !loading ? (
             <Box
@@ -196,6 +196,8 @@ const ViewPollDetails = () => {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
+                px: 2,
+                textAlign: "center",
               }}
             >
               <Typography variant="h4" sx={{ fontSize: "3rem" }}>
@@ -212,9 +214,9 @@ const ViewPollDetails = () => {
                 xs={12}
                 sm={8}
                 key={pollDetails.id}
-                sx={{ width: 450, maxWidth: "100%" }}
+                sx={{ width: { xs: '100%', sm: 450 }, maxWidth: "100%" }}
               >
-                <Card sx={{ width: 450, maxWidth: "100%", mt: 3 }}>
+                <Card sx={{ width: '100%', maxWidth: 450, mt: 3, mx: 'auto' }}>
                   <CardHeader
                     avatar={
                       <Avatar sx={{ bgcolor: blue[500] }} aria-label="recipe">
@@ -266,7 +268,15 @@ const ViewPollDetails = () => {
                       ))
                     )}
                   </CardContent>
-                  <CardActions disableSpacing sx={{ justifyContent: 'center', textAlign: 'center' }}>
+                  <CardActions 
+                    disableSpacing 
+                    sx={{ 
+                      justifyContent: 'center', 
+                      textAlign: 'center',
+                      flexDirection: { xs: 'column', sm: 'row' },
+                      gap: { xs: 0.5, sm: 0 }
+                    }}
+                  >
                     {pollDetails.isExpired ? (
                       <Typography variant="body2" color="text.secondary">
                         <strong>{pollDetails.totalVoteCount}</strong> votes 
@@ -276,7 +286,7 @@ const ViewPollDetails = () => {
                         <Typography variant="body2" color="text.secondary">
                           Vote: <strong>{pollDetails.totalVoteCount}</strong>
                         </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ ml: 2 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ ml: { xs: 0, sm: 2 } }}>
                           Expires At: <strong>{moment(pollDetails.expiredAt).format("HH:mm on MMMM D, YYYY")}</strong>
                         </Typography>
                       </>
@@ -317,8 +327,8 @@ const ViewPollDetails = () => {
                     </Grid>
                   </Grid>
                 </Card>
-                <Box mt={3}>
-                  <Card sx={{ maxWidth: 450 }}>
+                <Box mt={3} sx={{ width: '100%' }}>
+                  <Card sx={{ width: '100%', maxWidth: 450, mx: 'auto' }}>
                     <CardContent>
                       <Typography
                         variant="h6"

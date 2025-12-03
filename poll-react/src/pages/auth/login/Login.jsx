@@ -63,7 +63,7 @@ const Login = () => {
     return (
     <>
         <ThemeProvider theme={defaultTheme}>
-            <Container>
+            <Container maxWidth="xs" sx={{ px: { xs: 2, sm: 3 } }}>
                 <CssBaseline />
                 <Box
                     sx={{

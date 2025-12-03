@@ -62,7 +62,7 @@ const CreatePoll = () => {
   return (
     <>
       <ThemeProvider theme={defaultTheme}>
-        <Container component="main" maxWidth="xs">
+        <Container component="main" maxWidth="sm" sx={{ px: { xs: 2, sm: 3 } }}>
           <CssBaseline />
           <Box
             sx={{
@@ -78,11 +78,11 @@ const CreatePoll = () => {
             <Typography component="h1" variant="h5">
               Create Poll
             </Typography>
-            <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+            <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1, width: '100%' }}>
               <TextField
                 multiline
                 rows={2}
-                sx={{ width: '70ch' }}
+                sx={{ width: '100%' }}
                 margin="normal"
                 value={formData.question}
                 onChange={(e) => setFormData({ ...formData, question: e.target.value })}
@@ -95,7 +95,7 @@ const CreatePoll = () => {
               />
               <Autocomplete 
                 multiple
-                sx={{ width: '70ch' }}
+                sx={{ width: '100%' }}
                 options={[]}
                 freeSolo
                 value={formData.options}
@@ -110,7 +110,7 @@ const CreatePoll = () => {
                 )}
               />
               <DateTimePicker 
-                sx={{ mt: 3, width: '70ch' }}
+                sx={{ mt: 3, width: '100%' }}
                 label="Expired At"
                 value={formData.expiredAt}
                 onChange={(date) => setFormData({ ...formData, expiredAt: date })}
