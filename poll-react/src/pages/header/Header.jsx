@@ -140,7 +140,7 @@ const Header = () => {
                                 flexGrow: 1,
                                 cursor: 'pointer'
                             }}
-                            onClick={() => navigate(isUserLoggedIn ? '/dashboard' : '/login')}
+                            onClick={() => navigate('/')}
                         >
                             Polling App
                         </Typography>

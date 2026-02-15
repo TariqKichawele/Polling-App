@@ -95,7 +95,7 @@ public class PollServiceImpl implements PollService {
 
     @Override
     public List<PollDTO> getAllPolls() {
-        List<Poll> polls = pollRepository.findAll();
+        List<Poll> polls = pollRepository.findAllByExpiredAtAfter(new Date());
         return polls.stream().map(this::getPollDTOInService).collect(Collectors.toList());
     }
 
@@ -104,7 +104,7 @@ public class PollServiceImpl implements PollService {
         User loggedInUser = jwtUtil.getLoggedInUser();
         
         if (loggedInUser != null) {
-            return pollRepository.findAllByUserId(loggedInUser.getId())
+            return pollRepository.findAllByUserIdAndExpiredAtAfter(loggedInUser.getId(), new Date())
                 .stream()
                 .sorted(Comparator.comparing(Poll::getPostedDate).reversed())
                 .map(this::getPollDTOInService)

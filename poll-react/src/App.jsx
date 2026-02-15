@@ -7,12 +7,14 @@ import Dashboard from './pages/user/dashboard/Dashboard'
 import CreatePoll from './pages/user/create-poll/CreatePoll'
 import ViewPolls from './pages/user/view-polls/ViewPolls'
 import ViewPollDetails from './pages/user/view-polls/ViewPollDetails'
+import Home from './pages/home/Home'
 
 function App() {
   return (
     <>
       <Header />
       <Routes>
+        <Route path="/" element={<Home />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
